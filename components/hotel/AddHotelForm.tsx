@@ -1,5 +1,4 @@
 "use client";
-import { IHotel } from "@/models/Hotel";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -19,7 +18,16 @@ import React from "react";
 import { UploadButton } from "../uploadthing";
 import Image from "next/image";
 import { Button } from "../ui/button";
-import { Circle, Eye, Loader2, Pencil, PencilLine, Terminal, Trash } from "lucide-react";
+import {
+  Circle,
+  Eye,
+  Loader2,
+  Pencil,
+  PencilLine,
+  Plus,
+  Terminal,
+  Trash,
+} from "lucide-react";
 import axios from "axios";
 import useLocation from "@/hooks/useLocation";
 import { ICity, IState } from "country-state-city";
@@ -33,15 +41,27 @@ import {
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import AddRoomForm from "../room/AddRoomForm";
+import { IHotel, IRoom } from '@/models/Hotel';
 
-export interface IRoom {
-  id: string;
-  title: string;
-  price: number;
-}
+
+
+
+// export interface IRoom {
+//   id: string;
+//   title: string;
+//   price: number;
+// }
 
 interface AddHotelFormProps {
-  // hotel: IHotel;
   hotel?: HotelWithRooms;
 }
 
@@ -60,9 +80,7 @@ const formSchema = z.object({
   locationDescription: z
     .string()
     .min(10, { message: "Description must be at least 3 characters long" }),
-  //state: z.string().optional(),
   state: z.string().min(1, { message: "State is required" }),
-  // city: z.string().optional(),
   city: z.string().min(1, { message: "City is required" }),
   gym: z.boolean().optional(),
   bar: z.boolean().optional(),
@@ -81,7 +99,6 @@ const formSchema = z.object({
 });
 
 const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
-  //const [image, setImage] = React.useState<string | undefined>(hotel?.image);
   const [image, setImage] = React.useState<string | undefined>(
     hotel?.image || ""
   );
@@ -90,6 +107,7 @@ const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
   const [cities, setCities] = React.useState<ICity[]>([]);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [isHotelDeleting, setIsHotelDeleting] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
   const { getAllCountries, getCountryStates, getStateCities } = useLocation();
   const countries = getAllCountries();
   const router = useRouter();
@@ -258,6 +276,10 @@ const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
       .finally(() => {
         setImageIsDeleting(false);
       });
+  }
+
+  const handleDialogueOpen = ()=>{
+    setOpen(prev => !prev)
   }
   return (
     <div>
@@ -527,11 +549,9 @@ const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
                           <UploadButton
                             endpoint="imageUploader"
                             onClientUploadComplete={(res) => {
-                              // Do something with the response
                               console.log("Files: ", res);
                               alert("Upload Completed");
                               setImage(res[0].url);
-                              // Update react-hook-form value
                               field.onChange(res[0].url);
                               // toast({
                               //   title: "Image uploaded.",
@@ -712,18 +732,16 @@ const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
                 )}
               />
 
-                {hotel && !hotel.rooms?.length && (
-                  
-                    <Alert className="bg-indigo-600 text-white">
-                      <Terminal className="h-4 w-4 stroke-white"/>
-                      <AlertTitle>One Last Step!!</AlertTitle>
-                      <AlertDescription>
-                        Your Hotel was Created Successfully, 
-                        <div>Please Add Rooms to complete your hotel setup!</div>
-                      </AlertDescription>
-                    </Alert>
-                  
-                )}
+              {hotel && !hotel.rooms?.length && (
+                <Alert className="bg-indigo-600 text-white">
+                  <Terminal className="h-4 w-4 stroke-white" />
+                  <AlertTitle>One Last Step!!</AlertTitle>
+                  <AlertDescription>
+                    Your Hotel was Created Successfully,
+                    <div>Please Add Rooms to complete your hotel setup!</div>
+                  </AlertDescription>
+                </Alert>
+              )}
 
               <div className="flex justify-between gap-2 flex-wrap">
                 {hotel && (
@@ -758,8 +776,22 @@ const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
                   </Button>
                 )}
 
-                
-                
+
+                {hotel && 
+                <Dialog open={open} onOpenChange={setOpen}>
+                  <DialogTrigger><Button type="button" variant='outline' className="max-w-[150px]"> <Plus className="mr-2 h-4 w-4"/> Add Room</Button></DialogTrigger>
+                  <DialogContent className="max-w-[900px] w-[90%]">
+                    <DialogHeader className="px-2">
+                      <DialogTitle>Add a Room</DialogTitle>
+                      <DialogDescription>
+                        Add Details about room in your hotel.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <AddRoomForm hotel={hotel} handleDialogueOpen={handleDialogueOpen}/>
+                  </DialogContent>
+                </Dialog>
+                }
+
 
                 {hotel ? (
                   <>

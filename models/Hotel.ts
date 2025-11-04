@@ -26,6 +26,29 @@ export interface IHotel extends Document {
 }
 
 
+export interface IRoom extends Document {
+    title: string;
+    description: string;
+    bedCount: number;
+    guestCount: number;
+    bathroomCount: number;
+    kingBed: number;
+    queenBed: number;
+    image: string;
+    breakFastPrice: number;
+    roomPrice: number;
+    roomService: boolean;
+    balcony: boolean;
+    TV: boolean;
+    freeWifi: boolean;
+    cityView: boolean;
+    oceanView: boolean;
+    forestView: boolean;
+    mountainView: boolean;
+    airCondition: boolean;
+    soundProofed: boolean;
+}
+
 const HotelSchema: Schema<IHotel> = new Schema(
   {    
     userId: { type: String, required: true },
@@ -56,6 +79,37 @@ const HotelSchema: Schema<IHotel> = new Schema(
 );
 
 
+const RoomSchema: Schema<IRoom> = new Schema(
+    {
+      title: {type: String, required: true, maxlength: 500},
+      description: {type: String, required: true, maxlength: 500},
+      bedCount: {type: Number, required: true, },
+      guestCount: {type: Number, required: true, },
+      bathroomCount: {type: Number, required: true, },
+      kingBed: {type: Number, required: true, },
+      queenBed: {type: Number, required: true, },
+      image: {type: String, required: true, },
+      breakFastPrice: {type: Number, required: true, },
+      roomPrice: {type: Number, required: true, },
+      roomService: {type: Boolean, default: false, },
+      balcony: {type: Boolean, default: false, },
+      TV: {type: Boolean, default: false, },
+      freeWifi: {type: Boolean, default: false, },
+      cityView: {type: Boolean, default: false, },
+      oceanView: {type: Boolean, default: false, },
+      forestView: {type: Boolean, default: false, },
+      mountainView: {type: Boolean, default: false, },
+      airCondition: {type: Boolean, default: false, },
+      soundProofed: {type: Boolean, default: false, }, 
+    },
+  {
+    timestamps: { createdAt: 'addedAt', updatedAt: 'updatedAt' }, 
+  }
+)
+
+
+export const Room = (mongoose.models.Room || mongoose.model<IRoom>('Room', RoomSchema)) as Model<IRoom>;
 const Hotel = (mongoose.models.Hotel || mongoose.model<IHotel>('Hotel', HotelSchema)) as Model<IHotel>;
 
 export default Hotel;
+
