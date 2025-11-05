@@ -51,6 +51,8 @@ import {
 } from "@/components/ui/dialog";
 import AddRoomForm from "../room/AddRoomForm";
 import { IHotel, IRoom } from '@/models/Hotel';
+import RoomCard from "../room/RoomCard";
+import { Separator } from "@radix-ui/react-select";
 
 
 
@@ -176,32 +178,7 @@ const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
     //console.log("Form errors:", form.formState.errors);
   }, [form.watch("country")]);
 
-  // const form = useForm<z.infer<typeof formSchema>>({
-  //   resolver: zodResolver(formSchema),
-  //   defaultValues: {
-  //     title: "",
-  //     locationDescription: "",
-  //     country: "",
-  //     description: "",
-  //     state: "",
-  //     city: "",
-  //     image: "",
-  //     gym: false,
-  //     spa: false,
-  //     bar: false,
-  //     laundry: false,
-  //     restaurant: false,
-  //     shopping: false,
-  //     freeParking: false,
-  //     bikeRental: false,
-  //     freeWifi: false,
-  //     movieNights: false,
-  //     swimmingPool: false,
-  //     coffeShop: false,
-  //     price: 0,
-  //   },
-  // });
-
+  
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
     setIsLoading(true);
@@ -832,6 +809,15 @@ const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
                   </>
                 )}
               </div>
+              {hotel && !!hotel.rooms.length && <div>
+                <Separator />
+                <h3 className="text-lg font-semibold my-4"> Hotel Rooms</h3>
+                <div className="grid grid-cols-1 2xl:grid-cols-2 gap-6"> 
+                  {hotel.rooms.map((room)=>{
+                    return <RoomCard key={room.id} hotel= {hotel} room={room}/>
+                  })} 
+                </div>
+              </div>}
             </div>
           </div>
         </form>
