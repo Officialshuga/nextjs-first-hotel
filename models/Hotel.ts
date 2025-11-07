@@ -27,6 +27,7 @@ export interface IHotel extends Document {
 
 
 export interface IRoom extends Document {
+    _id: string;
     title: string;
     description: string;
     bedCount: number;
@@ -48,6 +49,47 @@ export interface IRoom extends Document {
     airCondition: boolean;
     soundProofed: boolean;
 }
+
+export interface IBooking extends Document {
+    _id: string;
+    userId: string;
+    hotelId: string;
+    roomId: string;
+    startDate: Date;
+    endDate: Date;
+    totalPrice: number;
+    breakFastIncluded: Boolean;
+    currency: String;
+    paymentStatus: Boolean;
+    paymentIntentId: String;
+    bookedAt: Date;
+    Hotel: IHotel;
+    Room: IRoom;
+    hotelOwnerId: String;
+}
+
+export const BookingSchema: Schema<IBooking> = new Schema(
+    {
+        userId: { type: String, required: true },
+        hotelId: { type: String, required: true },
+        roomId: { type: String, required: true },
+        startDate: { type: Date, required: true },
+        endDate: { type: Date, required: true },
+        totalPrice: { type: Number, required: true },
+        breakFastIncluded: { type: Boolean, required: true },
+        currency: { type: String, required: true },
+        paymentStatus: { type: Boolean, required: true },
+        paymentIntentId: { type: String, required: true },
+        bookedAt: { type: Date, required: true },
+        Hotel: { type: Schema.Types.ObjectId, ref: 'Hotel', required: true },
+        Room: { type: Schema.Types.ObjectId, ref: 'Room', required: true },
+        hotelOwnerId: { type: String, required: true },
+    },
+    {
+        timestamps: { createdAt: 'bookedAt', updatedAt: 'updatedAt' }, 
+    }
+)
+
 
 const HotelSchema: Schema<IHotel> = new Schema(
   {    
@@ -108,6 +150,7 @@ const RoomSchema: Schema<IRoom> = new Schema(
 )
 
 
+export const Booking = (mongoose.models.Booking || mongoose.model<IBooking>('Booking', BookingSchema)) as Model<IBooking>;
 export const Room = (mongoose.models.Room || mongoose.model<IRoom>('Room', RoomSchema)) as Model<IRoom>;
 const Hotel = (mongoose.models.Hotel || mongoose.model<IHotel>('Hotel', HotelSchema)) as Model<IHotel>;
 

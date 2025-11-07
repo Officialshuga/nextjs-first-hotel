@@ -60,17 +60,11 @@ export async function DELETE(
         
         await dbConnect();
         
-        // Optional: Verify the room belongs to the user before deleting
         const room = await Room.findById(roomId);
         
         if (!room) {
             return new NextResponse("Hotel not found", { status: 404 });
         }
-        
-        // Optional: Add ownership check
-        // if (hotel.userId !== userId) {
-        //     return new NextResponse("Forbidden: You don't own this hotel", { status: 403 });
-        // }
         
         await Room.findByIdAndDelete(roomId);
         

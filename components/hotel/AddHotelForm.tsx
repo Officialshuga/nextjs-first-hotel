@@ -52,8 +52,7 @@ import {
 import AddRoomForm from "../room/AddRoomForm";
 import { IHotel, IRoom } from '@/models/Hotel';
 import RoomCard from "../room/RoomCard";
-import { Separator } from "@radix-ui/react-select";
-
+import { Separator } from "../ui/separator";
 
 
 
@@ -809,12 +808,15 @@ const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
                   </>
                 )}
               </div>
-              {hotel && !!hotel.rooms.length && <div>
+              {hotel && !!hotel.rooms?.length && <div>
                 <Separator />
                 <h3 className="text-lg font-semibold my-4"> Hotel Rooms</h3>
                 <div className="grid grid-cols-1 2xl:grid-cols-2 gap-6"> 
                   {hotel.rooms.map((room)=>{
-                    return <RoomCard key={room.id} hotel= {hotel} room={room}/>
+                    console.log("Room being passed:", room);  
+                    console.log("Room _id:", room._id);       
+                    console.log("Room title:", room.title);
+                    return <RoomCard key={room._id} hotel= {hotel} room={room}/>
                   })} 
                 </div>
               </div>}
