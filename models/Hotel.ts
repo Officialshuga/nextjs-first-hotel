@@ -23,6 +23,7 @@ export interface IHotel extends Document {
   coffeShop: boolean;
   addedAt: Date;
   updatedAt: Date;
+  rooms: IRoom[];
 }
 
 
@@ -41,6 +42,7 @@ export interface IRoom extends Document {
     roomService: boolean;
     balcony: boolean;
     TV: boolean;
+    hotelId: string;
     freeWifi: boolean;
     cityView: boolean;
     oceanView: boolean;
@@ -116,9 +118,19 @@ const HotelSchema: Schema<IHotel> = new Schema(
     coffeShop: { type: Boolean, default: false },
   },
   {
-    timestamps: { createdAt: 'addedAt', updatedAt: 'updatedAt' }, 
+    timestamps: { createdAt: 'addedAt', updatedAt: 'updatedAt' },
+    toJSON: { virtuals: true },    
+    toObject: { virtuals: true }, 
   }
 );
+
+// ✅ Virtual populate for rooms
+HotelSchema.virtual('rooms', {
+  ref: 'Room',
+  localField: '_id',
+  foreignField: 'hotelId',
+});
+
 
 
 const RoomSchema: Schema<IRoom> = new Schema(
@@ -136,6 +148,7 @@ const RoomSchema: Schema<IRoom> = new Schema(
       roomService: {type: Boolean, default: false, },
       balcony: {type: Boolean, default: false, },
       TV: {type: Boolean, default: false, },
+      hotelId: { type: String, required: true },
       freeWifi: {type: Boolean, default: false, },
       cityView: {type: Boolean, default: false, },
       oceanView: {type: Boolean, default: false, },

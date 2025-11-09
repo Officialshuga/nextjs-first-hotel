@@ -50,11 +50,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import AddRoomForm from "../room/AddRoomForm";
-import { IHotel, IRoom } from '@/models/Hotel';
+import { IHotel, IRoom } from "@/models/Hotel";
 import RoomCard from "../room/RoomCard";
 import { Separator } from "../ui/separator";
-
-
 
 // export interface IRoom {
 //   id: string;
@@ -177,7 +175,6 @@ const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
     //console.log("Form errors:", form.formState.errors);
   }, [form.watch("country")]);
 
-  
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
     setIsLoading(true);
@@ -254,9 +251,9 @@ const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
       });
   }
 
-  const handleDialogueOpen = ()=>{
-    setOpen(prev => !prev)
-  }
+  const handleDialogueOpen = () => {
+    setOpen((prev) => !prev);
+  };
   return (
     <div>
       <Form {...form}>
@@ -752,22 +749,32 @@ const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
                   </Button>
                 )}
 
-
-                {hotel && 
-                <Dialog open={open} onOpenChange={setOpen}>
-                  <DialogTrigger><Button type="button" variant='outline' className="max-w-[150px]"> <Plus className="mr-2 h-4 w-4"/> Add Room</Button></DialogTrigger>
-                  <DialogContent className="max-w-[900px] w-[90%]">
-                    <DialogHeader className="px-2">
-                      <DialogTitle>Add a Room</DialogTitle>
-                      <DialogDescription>
-                        Add Details about room in your hotel.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <AddRoomForm hotel={hotel} handleDialogueOpen={handleDialogueOpen}/>
-                  </DialogContent>
-                </Dialog>
-                }
-
+                {hotel && (
+                  <Dialog open={open} onOpenChange={setOpen}>
+                    <DialogTrigger>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="max-w-[150px]"
+                      >
+                        {" "}
+                        <Plus className="mr-2 h-4 w-4" /> Add Room
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-[900px] w-[90%]">
+                      <DialogHeader className="px-2">
+                        <DialogTitle>Add a Room</DialogTitle>
+                        <DialogDescription>
+                          Add Details about room in your hotel.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <AddRoomForm
+                        hotel={hotel}
+                        handleDialogueOpen={handleDialogueOpen}
+                      />
+                    </DialogContent>
+                  </Dialog>
+                )}
 
                 {hotel ? (
                   <>
@@ -808,18 +815,22 @@ const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
                   </>
                 )}
               </div>
-              {hotel && !!hotel.rooms?.length && <div>
-                <Separator />
-                <h3 className="text-lg font-semibold my-4"> Hotel Rooms</h3>
-                <div className="grid grid-cols-1 2xl:grid-cols-2 gap-6"> 
-                  {hotel.rooms.map((room)=>{
-                    console.log("Room being passed:", room);  
-                    console.log("Room _id:", room._id);       
-                    console.log("Room title:", room.title);
-                    return <RoomCard key={room._id} hotel= {hotel} room={room}/>
-                  })} 
+              {hotel && hotel.rooms && hotel.rooms.length > 0 && (
+                <div>
+                  <Separator />
+                  <h3 className="text-lg font-semibold my-4">Hotel Rooms</h3>
+                  <div className="grid grid-cols-1 2xl:grid-cols-2 gap-6">
+                    {hotel.rooms.map((room) => {
+                      // console.log("Room being passed:", room);
+                      // console.log("Room _id:", room._id);
+                      // console.log("Room title:", room.title);
+                      return (
+                        <RoomCard key={room._id} hotel={hotel} room={room} />
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>}
+              )}
             </div>
           </div>
         </form>

@@ -21,7 +21,6 @@ import {
   Loader2,
   MountainSnow,
   Pencil,
-  Plus,
   Ship,
   Trash,
   Trees,
@@ -47,39 +46,43 @@ interface RoomCardProps {
 }
 
 const RoomCard = ({ hotel, room, bookings = [] }: RoomCardProps) => {
-  console.log("Hotel data:", hotel);
-  console.log("Room data:", room);
   const [isLoading, setIsLoading] = React.useState(false);
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = React.useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const isHotelDetailsPage = pathname.includes("hotel-details");
-  const handleDialogueOpen=()=>{
-    setOpen(prev => !prev)
-  }
+  
+  const handleDialogueOpen = () => {
+    setOpen(prev => !prev);
+  };
 
-  const handleRoomDelete = (room: IRoom)=>{
-    setIsLoading(true)
-    const imageKey = room.image.substring(room.image.lastIndexOf("/") +1)
-    axios.post("/api/uploadthing/delete", (imageKey)). then(()=> {
-      axios.delete(`/api/room/${room.id}`).then(()=>{
-        router.refresh()
-        alert("ROOM DELETED")
-      }).catch(()=>{
-        setIsLoading(false)
-        alert("SOMETHING WENT WRONG")
+  const handleRoomDelete = (room: IRoom) => {
+    setIsLoading(true);
+    const imageKey = room.image.substring(room.image.lastIndexOf("/") + 1);
+    axios.post("/api/uploadthing/delete", { imageKey }, { withCredentials: true })
+      .then(() => {
+        axios.delete(`/api/room/${room._id}`, { withCredentials: true })
+          .then(() => {
+            router.refresh();
+            alert("ROOM DELETED");
+            setIsLoading(false);
+          })
+          .catch(() => {
+            setIsLoading(false);
+            alert("SOMETHING WENT WRONG");
+          });
       })
-    }).catch(()=>{
-      setIsLoading(false)
-      alert("SOMETHING WENT WRONG")
-    })
-  }
+      .catch(() => {
+        setIsLoading(false);
+        alert("SOMETHING WENT WRONG");
+      });
+  };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle> {room.title} </CardTitle>
-        <CardDescription> {room.description} </CardDescription>
+        <CardTitle>{room?.title}</CardTitle>
+        <CardDescription>{room?.description}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="aspect-square overflow-hidden relative h-[200px] rounded-lg">
@@ -92,77 +95,74 @@ const RoomCard = ({ hotel, room, bookings = [] }: RoomCardProps) => {
         </div>
         <div className="grid grid-cols-2 gap-4 content-start text-sm">
           <AmenityItem>
-            {" "}
-            <Bed className="h-4 w-4 " /> {room.bedCount} Bed["(s)"]
+            <Bed className="h-4 w-4" /> {room.bedCount} Bed(s)
           </AmenityItem>
           <AmenityItem>
-            {" "}
-            <Users className="h-4 w-4 " /> {room.guestCount} Guest["(s)"]
+            <Users className="h-4 w-4" /> {room.guestCount} Guest(s)
           </AmenityItem>
           <AmenityItem>
-            {" "}
-            <Bath className="h-4 w-4 " /> {room.bathroomCount} Bath Room["(s)"]
+            <Bath className="h-4 w-4" /> {room.bathroomCount} Bathroom(s)
           </AmenityItem>
-          {!!room.kingBed && (
+          {room.kingBed > 0 && (
             <AmenityItem>
               <BedDouble className="h-4 w-4" />
-              {room.kingBed} King Bed["(s)"]{" "}
+              {room.kingBed} King Bed(s)
             </AmenityItem>
           )}
-          {!!room.queenBed && (
+          {room.queenBed > 0 && (
             <AmenityItem>
               <BedDouble className="h-4 w-4" />
-              {room.queenBed} Queen Bed["(s)"]{" "}
+              {room.queenBed} Queen Bed(s)
             </AmenityItem>
           )}
-          {!!room.roomService && (
+          {room.roomService && (
             <AmenityItem>
-              <UtensilsCrossed className="h-4 w-4" /> Room Services{" "}
+              <UtensilsCrossed className="h-4 w-4" /> Room Service
             </AmenityItem>
           )}
-          {!!room.TV && (
+          {room.TV && (
             <AmenityItem>
-              <Tv className="h-4 w-4" /> TV{" "}
+              <Tv className="h-4 w-4" /> TV
             </AmenityItem>
           )}
-          {!!room.balcony && (
+          {room.balcony && (
             <AmenityItem>
-              <Home className="h-4 w-4" /> balcony{" "}
+              <Home className="h-4 w-4" /> Balcony
             </AmenityItem>
           )}
-          {!!room.freeWifi && (
+          {room.freeWifi && (
             <AmenityItem>
-              <Wifi className="h-4 w-4" /> Free Wifi{" "}
+              <Wifi className="h-4 w-4" /> Free Wifi
             </AmenityItem>
           )}
-          {!!room.cityView && (
+          {room.cityView && (
             <AmenityItem>
-              <Castle className="h-4 w-4" /> City View{" "}
+              <Castle className="h-4 w-4" /> City View
             </AmenityItem>
           )}
-          {!!room.oceanView && (
+          {room.oceanView && (
             <AmenityItem>
-              <Ship className="h-4 w-4" /> Ocean View{" "}
+              <Ship className="h-4 w-4" /> Ocean View
             </AmenityItem>
           )}
-          {!!room.forestView && (
+          {room.forestView && (
             <AmenityItem>
-              <Trees className="h-4 w-4" /> Forest View{" "}
+              <Trees className="h-4 w-4" /> Forest View
             </AmenityItem>
           )}
-          {!!room.mountainView && (
+          {room.mountainView && (
             <AmenityItem>
-              <MountainSnow className="h-4 w-4" /> Mountain View{" "}
+              <MountainSnow className="h-4 w-4" /> Mountain View
             </AmenityItem>
           )}
-          {!!room.airCondition && (
+          {room.airCondition && (
             <AmenityItem>
-              <AirVent className="h-4 w-4" /> Air Condition
+              <AirVent className="h-4 w-4" /> Air Conditioning
             </AmenityItem>
           )}
-          {!!room.soundProofed && (
+          {room.soundProofed && (
             <AmenityItem>
-              <VolumeX className="h-4 w-4" /> Sound Proofed{" "}
+              <VolumeX className="h-4 w-4" /> Sound Proofed
             </AmenityItem>
           )}
         </div>
@@ -170,12 +170,12 @@ const RoomCard = ({ hotel, room, bookings = [] }: RoomCardProps) => {
         <div className="flex gap-4 justify-between">
           <div>
             Room Price: <span className="font-bold">${room.roomPrice}</span>
-            <span className="text-xs">/24hrs</span>{" "}
+            <span className="text-xs">/24hrs</span>
           </div>
-          {!!room.breakFastPrice && (
+          {room.breakFastPrice > 0 && (
             <div>
-              BreakFast Price:{" "}
-              <span className="font-bold"> ${room.breakFastPrice} </span>
+              Breakfast Price:{" "}
+              <span className="font-bold">${room.breakFastPrice}</span>
             </div>
           )}
         </div>
@@ -186,10 +186,15 @@ const RoomCard = ({ hotel, room, bookings = [] }: RoomCardProps) => {
           <div>Hotel Details Page</div>
         ) : (
           <div className="flex w-full justify-between">
-            <Button disabled={isLoading} type="button" variant="ghost" onClick={()=> handleRoomDelete(room)}>
+            <Button 
+              disabled={isLoading} 
+              type="button" 
+              variant="ghost" 
+              onClick={() => handleRoomDelete(room)}
+            >
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4" /> Deleting...
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting...
                 </>
               ) : (
                 <>
@@ -198,7 +203,7 @@ const RoomCard = ({ hotel, room, bookings = [] }: RoomCardProps) => {
               )}
             </Button>
             <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger>
+              <DialogTrigger asChild>
                 <Button
                   type="button"
                   variant="outline"

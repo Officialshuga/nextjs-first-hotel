@@ -67,11 +67,6 @@ export async function DELETE(
             return new NextResponse("Hotel not found", { status: 404 });
         }
         
-        // Optional: Add ownership check
-        // if (hotel.userId !== userId) {
-        //     return new NextResponse("Forbidden: You don't own this hotel", { status: 403 });
-        // }
-        
         await Hotel.findByIdAndDelete(hotelId);
         
         return new NextResponse("Hotel deleted successfully", { status: 200 });
@@ -81,3 +76,41 @@ export async function DELETE(
         return new NextResponse(error.message, { status: 500 });
     }
 }
+
+// export async function GET(
+//   req: Request, 
+//   { params }: { params: Promise<{ hotelId: string }> }
+// ) {
+//   try {
+//     const { userId } = await auth();
+    
+//     if (!userId) {
+//       return new NextResponse("Unauthorized", { status: 401 });
+//     }
+    
+//     const { hotelId } = await params;
+    
+//     if (!hotelId) {
+//       return new NextResponse("Hotel ID is required", { status: 400 });
+//     }
+    
+//     await dbConnect();
+    
+//     // ✅ Add .populate('rooms') to fetch related rooms
+//     const hotel = await Hotel.findById(hotelId).populate('rooms');
+    
+//     if (!hotel) {
+//       return new NextResponse("Hotel not found", { status: 404 });
+//     }
+    
+//     if (hotel.userId !== userId) {
+//       return new NextResponse("Unauthorized", { status: 403 });
+//     }
+    
+//     return NextResponse.json(hotel);
+    
+//   } catch (error: any) {
+//     console.log("Error at /api/hotel/hotelId GET", error);
+//     return new NextResponse(error.message, { status: 500 });
+//   }
+// }
