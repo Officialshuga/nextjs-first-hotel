@@ -1,11 +1,32 @@
-"use client"
+import { getHotels } from "@/actions/getHotels";
+import HotelList from "@/components/hotel/HotelList";
 
-import { Button } from "@/components/ui/button";
+interface HomeProps {
+  searchParams?: Promise<{
+    title?: string;
+    country?: string;
+    state?: string;
+    city?: string;
+  }>
+}
 
+export default async function Home({ searchParams }: HomeProps) {
+  const params = await searchParams; 
 
-export default function Home() {
-  
+  const hotels = await getHotels({
+    title: params?.title || "",
+    country: params?.country || "",
+    state: params?.state || "",
+    city: params?.city || "",
+  });
+
+  if (!hotels || hotels.length === 0) {
+    return <div>No hotels found...</div>;
+  }
+
   return (
-    <div> HOME PAGE <Button variant='ghost'>Home</Button> </div>
+    <div>
+      <HotelList hotels={hotels} />
+    </div>
   );
 }
