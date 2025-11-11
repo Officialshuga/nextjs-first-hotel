@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { IHotel, IRoom, IBooking } from "@/models/Hotel";
 import {
   Card,
@@ -36,6 +36,10 @@ import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import AddRoomForm from "./AddRoomForm";
 import axios from "axios";
+import DateRangePicker from "./DateRangePicker";
+import { differenceInCalendarDays } from "date-fns";
+import { Checkbox } from "../ui/checkbox";
+import { type DateRange } from "react-day-picker"
 
 interface RoomCardProps {
   hotel?: IHotel & {
@@ -45,13 +49,69 @@ interface RoomCardProps {
   bookings?: IBooking[];
 }
 
+type Range = DateRange | undefined
+
+
 const RoomCard = ({ hotel, room, bookings = [] }: RoomCardProps) => {
   const [isLoading, setIsLoading] = React.useState(false);
   const [open, setOpen] = React.useState(false);
+  const [internalRange, setInternalRange] = React.useState<Range>(undefined)
+  const [totalPrice, setTotalPrice] = React.useState(room.roomPrice)
   const pathname = usePathname();
   const router = useRouter();
   const isHotelDetailsPage = pathname.includes("hotel-details");
+  const [includeBreakfast, setIncludeBreakfast] = React.useState(false);
+  const [days, setDays] = useState(0)
   
+  
+  // React.useEffect(()=>{
+  //   if(internalRange && internalRange.from && internalRange.to){
+  //     const dayCount = differenceInCalendarDays{
+  //       internalRange.to,
+  //       internalRange.from
+  //     }
+  //     setDays(dayCount)
+  //     if(dayCount && room.roomPrice){
+  //       if (includeBreakfast && room.breakFastPrice){
+  //         setTotalPrice((dayCount * room.roomPrice) * (daycount * room.breakfastPrice))
+  //       }else{
+  //       setTotalPrice(dayCount * room.roomPrice)
+  //       }
+  //     }else{
+  //       setTotalPrice(room.roomPrice)
+  //     }
+      
+  //   }
+  // }, [room, room.roomPrice, includeBreakfast])
+
+  React.useEffect(() => {
+  if (internalRange?.from && internalRange?.to) {
+    const dayCount = differenceInCalendarDays(
+      internalRange.to,
+      internalRange.from
+    );
+
+    setDays(dayCount);
+
+    if (dayCount > 0) {
+      let baseCost = dayCount * room.roomPrice;
+
+      // Add breakfast cost only if selected
+      if (includeBreakfast && room.breakFastPrice > 0) {
+        baseCost += dayCount * room.breakFastPrice;
+      }
+
+      setTotalPrice(baseCost);
+    } else {
+      setTotalPrice(room.roomPrice);
+    }
+  }
+}, [internalRange, includeBreakfast, room]);
+
+
+
+
+
   const handleDialogueOpen = () => {
     setOpen(prev => !prev);
   };
@@ -183,7 +243,24 @@ const RoomCard = ({ hotel, room, bookings = [] }: RoomCardProps) => {
       </CardContent>
       <CardFooter>
         {isHotelDetailsPage ? (
-          <div>Hotel Details Page</div>
+          <div className="flex flex-col gap-6">
+            <div>
+              <div className="mb-2">Select days you will spend in this room</div>
+             <DateRangePicker setInternalRange={setInternalRange} internalRange={internalRange}/>
+            </div>
+            {room.breakFastPrice > 0 && <div>
+              <div className="mb-2"> Do you want to be served Breakfast each Day</div>
+              <div className="flex items-center space-x-2">
+              <Checkbox
+                id="breakfast"
+                onCheckedChange={(checked) => setIncludeBreakfast(!!checked)}
+              />
+                  <label htmlFor="breakFast" className="text-sm">Include BreakFast</label>
+              </div>
+              </div>}
+          <div>Total Price: <span className="font-bold">${totalPrice}</span> for <span className="font-bold">{days} Days </span></div>
+
+          </div>
         ) : (
           <div className="flex w-full justify-between">
             <Button 

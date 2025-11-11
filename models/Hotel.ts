@@ -124,7 +124,6 @@ const HotelSchema: Schema<IHotel> = new Schema(
   }
 );
 
-// ✅ Virtual populate for rooms
 HotelSchema.virtual('rooms', {
   ref: 'Room',
   localField: '_id',
