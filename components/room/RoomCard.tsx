@@ -28,18 +28,29 @@ import {
   Users,
   UtensilsCrossed,
   VolumeX,
+  Wand2,
   Wifi,
 } from "lucide-react";
 import { Separator } from "../ui/separator";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "../ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
 import AddRoomForm from "./AddRoomForm";
 import axios from "axios";
 import DateRangePicker from "./DateRangePicker";
 import { differenceInCalendarDays } from "date-fns";
 import { Checkbox } from "../ui/checkbox";
-import { type DateRange } from "react-day-picker"
+import { type DateRange } from "react-day-picker";
+import { useAuth } from "@clerk/nextjs";
+import useBookRoom from "@/hooks/useBookRoom";
+import { set } from "mongoose";
 
 interface RoomCardProps {
   hotel?: IHotel & {
@@ -49,79 +60,58 @@ interface RoomCardProps {
   bookings?: IBooking[];
 }
 
-type Range = DateRange | undefined
-
+type Range = DateRange | undefined;
 
 const RoomCard = ({ hotel, room, bookings = [] }: RoomCardProps) => {
   const [isLoading, setIsLoading] = React.useState(false);
   const [open, setOpen] = React.useState(false);
-  const [internalRange, setInternalRange] = React.useState<Range>(undefined)
-  const [totalPrice, setTotalPrice] = React.useState(room.roomPrice)
+  const [internalRange, setInternalRange] = React.useState<Range>(undefined);
+  const [totalPrice, setTotalPrice] = React.useState(room.roomPrice);
   const pathname = usePathname();
   const router = useRouter();
   const isHotelDetailsPage = pathname.includes("hotel-details");
   const [includeBreakfast, setIncludeBreakfast] = React.useState(false);
-  const [days, setDays] = useState(0)
-  
-  
-  // React.useEffect(()=>{
-  //   if(internalRange && internalRange.from && internalRange.to){
-  //     const dayCount = differenceInCalendarDays{
-  //       internalRange.to,
-  //       internalRange.from
-  //     }
-  //     setDays(dayCount)
-  //     if(dayCount && room.roomPrice){
-  //       if (includeBreakfast && room.breakFastPrice){
-  //         setTotalPrice((dayCount * room.roomPrice) * (daycount * room.breakfastPrice))
-  //       }else{
-  //       setTotalPrice(dayCount * room.roomPrice)
-  //       }
-  //     }else{
-  //       setTotalPrice(room.roomPrice)
-  //     }
-      
-  //   }
-  // }, [room, room.roomPrice, includeBreakfast])
+  const [days, setDays] = useState(0);
+  const [bookingIsLoading, setBookingIsLoading] = React.useState(false);
+  const { userId } = useAuth();
+  const { setRoomData, paymentIntentId, setClientSecret, setPaymentIntentId } = useBookRoom();
 
   React.useEffect(() => {
-  if (internalRange?.from && internalRange?.to) {
-    const dayCount = differenceInCalendarDays(
-      internalRange.to,
-      internalRange.from
-    );
+    if (internalRange?.from && internalRange?.to) {
+      const dayCount = differenceInCalendarDays(
+        internalRange.to,
+        internalRange.from
+      );
 
-    setDays(dayCount);
+      setDays(dayCount);
 
-    if (dayCount > 0) {
-      let baseCost = dayCount * room.roomPrice;
+      if (dayCount > 0) {
+        let baseCost = dayCount * room.roomPrice;
 
-      // Add breakfast cost only if selected
-      if (includeBreakfast && room.breakFastPrice > 0) {
-        baseCost += dayCount * room.breakFastPrice;
+        // Add breakfast cost only if selected
+        if (includeBreakfast && room.breakFastPrice > 0) {
+          baseCost += dayCount * room.breakFastPrice;
+        }
+
+        setTotalPrice(baseCost);
+      } else {
+        setTotalPrice(room.roomPrice);
       }
-
-      setTotalPrice(baseCost);
-    } else {
-      setTotalPrice(room.roomPrice);
     }
-  }
-}, [internalRange, includeBreakfast, room]);
-
-
-
-
+  }, [internalRange, includeBreakfast, room]);
 
   const handleDialogueOpen = () => {
-    setOpen(prev => !prev);
+    setOpen((prev) => !prev);
   };
 
   const handleRoomDelete = (room: IRoom) => {
     setIsLoading(true);
     const imageKey = room.image.substring(room.image.lastIndexOf("/") + 1);
-    axios.post("/api/uploadthing/delete", { imageKey }, { withCredentials: true })
+    axios
+      .post("/api/uploadthing/delete", { imageKey }, { withCredentials: true })
       .then(() => {
-        axios.delete(`/api/room/${room._id}`, { withCredentials: true })
+        axios
+          .delete(`/api/room/${room._id}`, { withCredentials: true })
           .then(() => {
             router.refresh();
             alert("ROOM DELETED");
@@ -136,6 +126,91 @@ const RoomCard = ({ hotel, room, bookings = [] }: RoomCardProps) => {
         setIsLoading(false);
         alert("SOMETHING WENT WRONG");
       });
+  };
+
+  const handleBookRoom = () => {
+    if (!userId) {
+      return alert("Please sign in to book a room");
+    }
+
+    if (!hotel?.userId) {
+      return alert("Hotel owner not found. Something went wrong.");
+    }
+
+    if (!internalRange?.from || !internalRange?.to) {
+      return alert("Please select a date range before booking.");
+    }
+
+    setBookingIsLoading(true);
+
+    const bookingRoomData = {
+      room,
+      totalPrice,
+      breakFastIncluded: includeBreakfast,
+      startDate: internalRange.from,
+      endDate: internalRange.to,
+    };
+    setRoomData(bookingRoomData);
+  fetch("/api/book-room", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    booking: {
+      hotelOwnerID: hotel.userId,
+      hotelID: hotel._id,
+      roomID: room._id,
+      startDate: internalRange.from,
+      endDate: internalRange.to,
+      totalPrice: totalPrice,
+      breakFastIncluded: includeBreakfast,
+    },
+  }),
+})
+  .then(async (res) => {
+    if (res.status === 401) return router.push("/sign-in");
+    return res.json();
+  })
+  .then((data) => {
+    window.location.href = data.authorization_url; // ✅ redirect to Paystack checkout
+  })
+  .catch((err) => {
+    console.log(err);
+    setBookingIsLoading(false);
+  });
+
+    // fetch("api/create-payment-intent", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({
+    //     booking: {
+    //       hotelOwnerID: hotel.userId,
+    //       hotelID: hotel._id,
+    //       roomID: room._id,
+    //       startDate: internalRange.from,
+    //       endDate: internalRange.to,
+    //       totalPrice: totalPrice,
+    //       breakFastIncluded: includeBreakfast,
+    //     },
+    //     payment_intent_id: paymentIntentId,
+    //   }),
+    // }).then((res)=>{
+    //   setBookingIsLoading(false);
+    //   if(res.status === 401){
+    //     return router.push("/sign-in");
+    //   }
+    //   return res.json()
+    // }).then((data)=>{
+    //   setClientSecret(data.paymentIntent.client_secret);
+    //   setPaymentIntentId(data.paymentIntent.id);
+    //   router.push("/book-room")
+    // }).catch((err)=>{
+    //   console.log(err);
+    //   setBookingIsLoading(false);
+    // });
+
+    console.log("BOOKING DATA:", bookingRoomData);
   };
 
   return (
@@ -245,28 +320,56 @@ const RoomCard = ({ hotel, room, bookings = [] }: RoomCardProps) => {
         {isHotelDetailsPage ? (
           <div className="flex flex-col gap-6">
             <div>
-              <div className="mb-2">Select days you will spend in this room</div>
-             <DateRangePicker setInternalRange={setInternalRange} internalRange={internalRange}/>
-            </div>
-            {room.breakFastPrice > 0 && <div>
-              <div className="mb-2"> Do you want to be served Breakfast each Day</div>
-              <div className="flex items-center space-x-2">
-              <Checkbox
-                id="breakfast"
-                onCheckedChange={(checked) => setIncludeBreakfast(!!checked)}
-              />
-                  <label htmlFor="breakFast" className="text-sm">Include BreakFast</label>
+              <div className="mb-2">
+                Select days you will spend in this room
               </div>
-              </div>}
-          <div>Total Price: <span className="font-bold">${totalPrice}</span> for <span className="font-bold">{days} Days </span></div>
-
+              <DateRangePicker
+                setInternalRange={setInternalRange}
+                internalRange={internalRange}
+              />
+            </div>
+            {room.breakFastPrice > 0 && (
+              <div>
+                <div className="mb-2">
+                  {" "}
+                  Do you want to be served Breakfast each Day
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="breakfast"
+                    onCheckedChange={(checked) =>
+                      setIncludeBreakfast(!!checked)
+                    }
+                  />
+                  <label htmlFor="breakFast" className="text-sm">
+                    Include BreakFast
+                  </label>
+                </div>
+              </div>
+            )}
+            <div>
+              Total Price: <span className="font-bold">${totalPrice}</span> for{" "}
+              <span className="font-bold">{days} Days </span>
+            </div>
+            <Button
+              onClick={() => handleBookRoom()}
+              disabled={bookingIsLoading}
+              type="button"
+            >
+              {bookingIsLoading ? (
+                <Loader2 className="mr-2 h-4 w-4" />
+              ) : (
+                <Wand2 className="mr-2 h-4 w-4" />
+              )}
+              {bookingIsLoading ? "Loading..." : "Book Room"}
+            </Button>
           </div>
         ) : (
           <div className="flex w-full justify-between">
-            <Button 
-              disabled={isLoading} 
-              type="button" 
-              variant="ghost" 
+            <Button
+              disabled={isLoading}
+              type="button"
+              variant="ghost"
               onClick={() => handleRoomDelete(room)}
             >
               {isLoading ? (

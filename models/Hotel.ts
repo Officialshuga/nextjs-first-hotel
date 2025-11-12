@@ -66,6 +66,7 @@ export interface IBooking extends Document {
     paymentIntentId: String;
     bookedAt: Date;
     Hotel: IHotel;
+    userEmail: String;
     Room: IRoom;
     hotelOwnerId: String;
 }
