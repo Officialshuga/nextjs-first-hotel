@@ -25,8 +25,6 @@ export async function getHotelById(hotelId: string) {
       })),
     };
 
-    // console.log("Hotel fetched with rooms:", hotel.title);
-    // console.log("Number of rooms:", hotel.rooms.length);
 
     return hotel;
   } catch (error) {

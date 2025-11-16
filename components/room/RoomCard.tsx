@@ -45,12 +45,15 @@ import {
 import AddRoomForm from "./AddRoomForm";
 import axios from "axios";
 import DateRangePicker from "./DateRangePicker";
-import { differenceInCalendarDays } from "date-fns";
+import { differenceInCalendarDays, eachDayOfInterval } from "date-fns";
 import { Checkbox } from "../ui/checkbox";
 import { type DateRange } from "react-day-picker";
 import { useAuth } from "@clerk/nextjs";
 import useBookRoom from "@/hooks/useBookRoom";
-import { set } from "mongoose";
+import { useUser } from "@clerk/nextjs";
+
+
+
 
 interface RoomCardProps {
   hotel?: IHotel & {
@@ -75,6 +78,7 @@ const RoomCard = ({ hotel, room, bookings = [] }: RoomCardProps) => {
   const [bookingIsLoading, setBookingIsLoading] = React.useState(false);
   const { userId } = useAuth();
   const { setRoomData, paymentIntentId, setClientSecret, setPaymentIntentId } = useBookRoom();
+  const { user } = useUser();
 
   React.useEffect(() => {
     if (internalRange?.from && internalRange?.to) {
@@ -88,7 +92,6 @@ const RoomCard = ({ hotel, room, bookings = [] }: RoomCardProps) => {
       if (dayCount > 0) {
         let baseCost = dayCount * room.roomPrice;
 
-        // Add breakfast cost only if selected
         if (includeBreakfast && room.breakFastPrice > 0) {
           baseCost += dayCount * room.breakFastPrice;
         }
@@ -99,6 +102,22 @@ const RoomCard = ({ hotel, room, bookings = [] }: RoomCardProps) => {
       }
     }
   }, [internalRange, includeBreakfast, room]);
+
+
+  const disabledDates = React.useMemo(()=>{
+    let dates: Date[] = []
+    const roomBookings = bookings.filter((booking)=> booking.roomId === room._id)
+    roomBookings.forEach((booking)=>{
+      const range = eachDayOfInterval({
+        start: new Date(booking.startDate),
+        end: new Date(booking.endDate)
+      })
+      dates = [...range, ...dates]
+      // return dates
+    })
+    return dates
+  }, [bookings])
+
 
   const handleDialogueOpen = () => {
     setOpen((prev) => !prev);
@@ -151,66 +170,96 @@ const RoomCard = ({ hotel, room, bookings = [] }: RoomCardProps) => {
       endDate: internalRange.to,
     };
     setRoomData(bookingRoomData);
-  fetch("/api/book-room", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    booking: {
-      hotelOwnerID: hotel.userId,
-      hotelID: hotel._id,
-      roomID: room._id,
-      startDate: internalRange.from,
-      endDate: internalRange.to,
-      totalPrice: totalPrice,
-      breakFastIncluded: includeBreakfast,
-    },
-  }),
-})
-  .then(async (res) => {
-    if (res.status === 401) return router.push("/sign-in");
-    return res.json();
-  })
-  .then((data) => {
-    window.location.href = data.authorization_url; // ✅ redirect to Paystack checkout
-  })
-  .catch((err) => {
-    console.log(err);
-    setBookingIsLoading(false);
-  });
-
-    // fetch("api/create-payment-intent", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({
-    //     booking: {
-    //       hotelOwnerID: hotel.userId,
-    //       hotelID: hotel._id,
-    //       roomID: room._id,
-    //       startDate: internalRange.from,
-    //       endDate: internalRange.to,
-    //       totalPrice: totalPrice,
-    //       breakFastIncluded: includeBreakfast,
-    //     },
-    //     payment_intent_id: paymentIntentId,
-    //   }),
-    // }).then((res)=>{
-    //   setBookingIsLoading(false);
-    //   if(res.status === 401){
-    //     return router.push("/sign-in");
-    //   }
-    //   return res.json()
-    // }).then((data)=>{
-    //   setClientSecret(data.paymentIntent.client_secret);
-    //   setPaymentIntentId(data.paymentIntent.id);
-    //   router.push("/book-room")
-    // }).catch((err)=>{
-    //   console.log(err);
-    //   setBookingIsLoading(false);
-    // });
-
+    fetch("/api/book-room", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        booking: {
+          hotelOwnerID: hotel.userId,
+          hotelId: hotel._id,
+          roomId: room._id,
+          startDate: internalRange.from,
+          endDate: internalRange.to,
+          totalPrice: totalPrice,
+          breakFastIncluded: includeBreakfast,
+        },
+        userEmail: user?.emailAddresses[0]?.emailAddress,
+        userName: user?.firstName,
+      }),
+    })
+      .then(async (res) => {
+        if (res.status === 401) return router.push("/sign-in");
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error(errorText || "Booking failed");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (data.authorization_url) {
+          window.location.href = data.authorization_url;
+          router.push("/book-room")
+        } else {
+          throw new Error("No payment URL received");
+        }
+      })
+      .catch((err) => {
+        console.error("Booking error:", err);
+        setBookingIsLoading(false);
+      });
+      
     console.log("BOOKING DATA:", bookingRoomData);
+
+
+
+//   const bookingRoomData = {
+//   room,
+//   totalPrice,
+//   breakFastIncluded: includeBreakfast,
+//   startDate: internalRange.from,
+//   endDate: internalRange.to,
+// };
+// setRoomData(bookingRoomData);
+
+// fetch("/api/book-room", {
+//   method: "POST",
+//   headers: { "Content-Type": "application/json" },
+//   body: JSON.stringify({
+//     booking: {
+//       hotelOwnerID: hotel.userId,
+//       hotelId: hotel._id,
+//       roomId: room._id,
+//       startDate: internalRange.from,
+//       endDate: internalRange.to,
+//       totalPrice: totalPrice,
+//       breakFastIncluded: includeBreakfast,
+//     },
+//     userEmail: user?.emailAddresses[0]?.emailAddress,
+//     userName: user?.firstName,
+//   }),
+// })
+//   .then(async (res) => {
+//     if (res.status === 401) return router.push("/sign-in");
+//     if (!res.ok) {
+//       const errorText = await res.text();
+//       throw new Error(errorText || "Booking failed");
+//     }
+//     return res.json();
+//   })
+//   .then((data) => {
+//     if (data.authorization_url) {
+//       // ✅ Just redirect to Paystack - they'll handle the rest
+//       window.location.href = data.authorization_url;
+//     } else {
+//       throw new Error("No payment URL received");
+//     }
+//   })
+//   .catch((err) => {
+//     console.error("Booking error:", err);
+//     setBookingIsLoading(false);
+//   });
+
+// console.log("BOOKING DATA:", bookingRoomData);
   };
 
   return (
@@ -304,13 +353,13 @@ const RoomCard = ({ hotel, room, bookings = [] }: RoomCardProps) => {
         <Separator />
         <div className="flex gap-4 justify-between">
           <div>
-            Room Price: <span className="font-bold">${room.roomPrice}</span>
+            Room Price: <span className="font-bold">₦{room.roomPrice}</span>
             <span className="text-xs">/24hrs</span>
           </div>
           {room.breakFastPrice > 0 && (
             <div>
               Breakfast Price:{" "}
-              <span className="font-bold">${room.breakFastPrice}</span>
+              <span className="font-bold">₦{room.breakFastPrice}</span>
             </div>
           )}
         </div>
@@ -324,6 +373,7 @@ const RoomCard = ({ hotel, room, bookings = [] }: RoomCardProps) => {
                 Select days you will spend in this room
               </div>
               <DateRangePicker
+                disabledDates={disabledDates}
                 setInternalRange={setInternalRange}
                 internalRange={internalRange}
               />
@@ -348,7 +398,7 @@ const RoomCard = ({ hotel, room, bookings = [] }: RoomCardProps) => {
               </div>
             )}
             <div>
-              Total Price: <span className="font-bold">${totalPrice}</span> for{" "}
+              Total Price: <span className="font-bold">₦{totalPrice}</span> for{" "}
               <span className="font-bold">{days} Days </span>
             </div>
             <Button

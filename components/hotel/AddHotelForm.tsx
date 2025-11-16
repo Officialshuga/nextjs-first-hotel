@@ -54,11 +54,6 @@ import { IHotel, IRoom } from "@/models/Hotel";
 import RoomCard from "../room/RoomCard";
 import { Separator } from "../ui/separator";
 
-// export interface IRoom {
-//   id: string;
-//   title: string;
-//   price: number;
-// }
 
 interface AddHotelFormProps {
   hotel?: HotelWithRooms;
@@ -153,7 +148,6 @@ const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
     if (countryStates) {
       setStates(countryStates);
     }
-    //console.log("Form errors:", form.formState.errors);
   }, [form.watch("country")]);
 
   React.useEffect(() => {
@@ -163,7 +157,6 @@ const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
     if (stateCities) {
       setCities(stateCities);
     }
-    //console.log("Form errors:", form.formState.errors);
   }, [form.watch("country"), form.watch("state")]);
 
   React.useEffect(() => {
@@ -172,7 +165,6 @@ const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
     if (countryStates) {
       setStates(countryStates);
     }
-    //console.log("Form errors:", form.formState.errors);
   }, [form.watch("country")]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -223,7 +215,6 @@ const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
   };
 
   function handleDeleteImage(image: string) {
-    //setImage(undefined);
     const imageKey = image.substring(image.lastIndexOf("/") + 1);
     setImageIsDeleting(true);
     axios
