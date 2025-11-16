@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import NavBar from "@/components/layout/navbar/NavBar";
 import { ThemeProvider } from "@/components/theme-provider";
 import Container from "@/components/Container";
+import LocationFilter from "@/components/LocationFilter";
 
 export const metadata: Metadata = {
   title: "Amahan Hotels",
@@ -29,6 +30,7 @@ export default function RootLayout({
           >
             <main className="flex flex-col min-h-screen bg-secondary">
               <NavBar />
+              <LocationFilter/>
               <section className="flex grow">
                 <Container>
                   {children}

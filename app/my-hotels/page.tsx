@@ -1,7 +1,5 @@
-
 import { getHotelByUserId } from '@/actions/getHotelsByUserId';
 import HotelList from '@/components/hotel/HotelList';
-import React from 'react';
 
 const myHotels = async () => {
   const hotels = await getHotelByUserId();

@@ -1,5 +1,5 @@
 
-"use server";
+// "use server";
 
 import dbConnect from "@/lib/dbConnect";
 import Hotel from "@/models/Hotel";

@@ -23,14 +23,14 @@ const Searchinput = () => {
       url: window.location.href,
       query
     }, {skipNull: true, skipEmptyString: true})
-    console.log('url' , url)
+    // console.log('url' , url)
     router.push(url)
   }, [debounceValue, router])
 
   const onChange: ChangeEventHandler<HTMLInputElement> = (e)=>{
     setValue(e.target.value)
   }
-  if(pathname === "/") return null;
+  // if(pathname === "/") return null;
   return (
     <div className='relative sm:block hidden'>
         <Search className='absolute h-4 w-4 top-3 left-4 text-muted-foreground'/>

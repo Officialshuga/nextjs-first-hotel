@@ -60,10 +60,10 @@ export interface IBooking extends Document {
     startDate: Date;
     endDate: Date;
     totalPrice: number;
-    breakFastIncluded: Boolean;
-    currency: String;
-    paymentStatus: Boolean;
-    paymentIntentId: String;
+    breakFastIncluded: boolean;
+    currency: string;
+    paymentStatus: boolean;
+    paymentIntentId: string;
     bookedAt: Date;
     Hotel: IHotel;
     userEmail: String;
