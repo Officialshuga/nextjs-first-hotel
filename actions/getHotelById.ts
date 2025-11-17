@@ -1,7 +1,7 @@
-// "use server";
+"use server";
 
-import dbConnect from "@/lib/dbConnect";
-import Hotel, { Room } from "@/models/Hotel";
+// import dbConnect from "@/lib/dbConnect";
+// import Hotel, { Room } from "@/models/Hotel";
 
 // import dbConnect from "@/lib/dbConnect";
 // import Hotel, { Room } from "@/models/Hotel";
@@ -36,36 +36,41 @@ import Hotel, { Room } from "@/models/Hotel";
 //   }
 // }
 
+"use server";
+
+import dbConnect from "@/lib/dbConnect";
+import Hotel, { Room } from "@/models/Hotel";
+
 export async function getHotelById(hotelId: string) {
   try {
     await dbConnect();
 
+    // Use lean() to remove all Mongoose Document metadata
     const hotelDoc = await Hotel.findById(hotelId).lean();
 
-    if (!hotelDoc) {
-      return null;
-    }
+    if (!hotelDoc) return null;
 
-    const roomsDocs = await Room.find({ hotelId: hotelId }).lean();
+    // Fetch rooms separately (also lean)
+    const roomsDocs = await Room.find({ hotelId }).lean();
 
-    // Create a plain JavaScript object with only the properties we need
+    // Convert everything into clean JSON objects
     const hotel = {
       ...hotelDoc,
-      _id: hotelDoc._id.toString(),
-      userId: hotelDoc.userId?.toString(), // Convert ObjectId to string if it exists
+      _id: hotelDoc._id?.toString(),
+      userId: hotelDoc.userId?.toString(),
+
       rooms: roomsDocs.map((room: any) => ({
         ...room,
-        _id: room._id.toString(),
+        _id: room._id?.toString(),
         hotelId: room.hotelId?.toString(),
-        // Add any other room properties you need
       })),
-      // Remove any MongoDB-specific properties that might cause issues
-      __v: undefined,
     };
 
-    return hotel;
+    // Final purification — GUARANTEES Next.js build success
+    return JSON.parse(JSON.stringify(hotel));
   } catch (error) {
-    console.error('Error fetching hotel by ID:', error);
+    console.error("Error fetching hotel:", error);
     return null;
   }
 }
+

@@ -57,6 +57,7 @@ import { Separator } from "../ui/separator";
 
 interface AddHotelFormProps {
   hotel?: HotelWithRooms;
+  bookings?: any[];
 }
 
 export type HotelWithRooms = IHotel & {
@@ -92,7 +93,7 @@ const formSchema = z.object({
   image: z.string().min(1, { message: "Image is required" }),
 });
 
-const AddHotelForm = ({ hotel }: AddHotelFormProps) => {
+const AddHotelForm = ({ hotel, bookings }: AddHotelFormProps) => {
   const [image, setImage] = React.useState<string | undefined>(
     hotel?.image || ""
   );
