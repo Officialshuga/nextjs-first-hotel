@@ -1,146 +1,3 @@
-// "use client"
-// import React from 'react'
-// import Container from './Container'
-// import { Select, SelectItem } from './ui/select'
-// //import { SelectContent, SelectTrigger, SelectValue } from '@radix-ui/react-select'
-// import useLocation from '@/hooks/useLocation'
-// import { SelectTrigger, SelectValue, SelectContent } from './ui/select'
-// import { ICity, IState } from 'country-state-city'
-// import { useRouter, useSearchParams } from 'next/navigation'
-// import qs from "query-string"
-// import { Button } from './ui/button'
-// const LocationFilter = () => {
-//     const [country, setCountry] = React.useState("")
-//     const [state, setState] = React.useState("")
-//     const [city, setCity] = React.useState("")
-//     const [states, setStates] = React.useState<IState[]>([])
-//     const [cities, setCities] = React.useState<ICity[]>([])
-//     const {getAllCountries, getCountryStates, getStateCities} = useLocation();
-//     const countries = getAllCountries()
-//     const router = useRouter()
-//     const params = useSearchParams()
-//     //const state = getCountryStates()
-
-
-//     React.useEffect(()=>{
-//         const countryStates = getCountryStates(country)
-//         if(countryStates){
-//             setStates(countryStates)
-//             setState("")
-//             setCity("")
-//         }
-//     }, [country])
-
-//     React.useEffect(()=>{
-//         const stateCities = getStateCities(country, state)
-//         if(stateCities){
-//             setCities(stateCities)
-//             //setState("")
-//             setCity("")
-//         }
-//     }, [country, state])
-
-//     React.useEffect(()=>{
-//         if(country === "" && state === "" && city === "") return router.push("/")
-//             let currentQuery: any ={}
-//         if(params){
-//             currentQuery = qs.parse(params.toString())
-//         }
-//         if(country){
-//             currentQuery = {
-//                 ...currentQuery,
-//                 country
-//             }
-//         }
-//         if(state){
-//             currentQuery = {
-//                 ...currentQuery,
-//                 state
-//             }
-//         }
-//         if(city){
-//             currentQuery = {
-//                 ...currentQuery,
-//                 city
-//             }
-//         }
-
-//         if(state === "" && currentQuery.state){
-//             delete currentQuery.state
-//         }
-
-//         if(city === "" && currentQuery.city){
-//             delete currentQuery.city
-//         }
-
-//         const url = qs.stringifyUrl({
-//             url: "/",
-//             query: currentQuery
-//         }, {skipNull: true, skipEmptyString: true})
-//         router.push(url)
-//     }, [country, state, city])
-
-//     const handleClear=()=>{
-//         router.push("/")
-//         setCountry("")
-//         setState("")
-//         setCity("")
-//     }
-
-//   return (
-//     <Container>
-//         <div className='flex gap-2 md:gap-4 items-center justify-center text-sm'>
-//             <div>
-//                 <Select value={country} onValueChange={(value)=> setCountry(value)}>
-//                     <SelectTrigger className='bg-background'>
-//                         <SelectValue placeholder="Country"/>
-//                     </SelectTrigger>
-//                     <SelectContent>
-//                         {countries.map((country)=>(
-//                             <SelectItem key={country.isoCode} value={country.isoCode}>
-//                                 {country.name}    
-//                             </SelectItem>
-//                         ))}
-//                     </SelectContent>
-//                 </Select>
-//             </div>
-//             <div>
-//                 <Select value={state} onValueChange={(value)=> setState(value)}>
-//                     <SelectTrigger className='bg-background'>
-//                         <SelectValue placeholder="States"/>
-//                     </SelectTrigger>
-//                     <SelectContent>
-//                         {state.length && states.map((state)=>(
-//                             <SelectItem key={state.isoCode} value={state.isoCode}>
-//                                 {state.name}    
-//                             </SelectItem>
-//                         ))}
-//                     </SelectContent>
-//                 </Select>
-//             </div>
-//             <div>
-//                 <Select value={city} onValueChange={(value)=> setCity(value)}>
-//                     <SelectTrigger className='bg-background'>
-//                         <SelectValue placeholder="City"/>
-//                     </SelectTrigger>
-//                     <SelectContent>
-//                         {cities.length && cities.map((city)=>(
-//                             <SelectItem key={city.name} value={city.name}>
-//                                 {city.name}    
-//                             </SelectItem>
-//                         ))}
-//                     </SelectContent>
-//                 </Select>
-//             </div>
-//             <Button onClick={()=> handleClear()} variant="outline">Clear Filters</Button>
-//         </div>
-//     </Container>
-//   )
-// }
-
-// export default LocationFilter
-
-
 "use client";
 
 import React from "react";
@@ -148,7 +5,7 @@ import Container from "./Container";
 import { Select, SelectItem, SelectTrigger, SelectValue, SelectContent } from "./ui/select";
 import useLocation from "@/hooks/useLocation";
 import { ICity, IState } from "country-state-city";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import qs from "query-string";
 import { Button } from "./ui/button";
 
@@ -166,6 +23,8 @@ const LocationFilter = () => {
 
   const router = useRouter();
   const params = useSearchParams();
+  const pathname = usePathname()
+  
 
   // Load states when country changes
   React.useEffect(() => {
@@ -229,7 +88,7 @@ const LocationFilter = () => {
     setStates([]);
     setCities([]);
   };
-
+if(pathname === "/") return null;
   return (
     <Container>
       <div className="flex gap-2 md:gap-4 items-center justify-center text-sm">

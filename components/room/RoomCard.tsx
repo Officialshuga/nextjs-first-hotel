@@ -209,7 +209,7 @@ const RoomCard = ({ hotel, room, bookings = [] }: RoomCardProps) => {
       });
       
     console.log("BOOKING DATA:", bookingRoomData);
-
+  };
 
   return (
     <Card>
