@@ -1,5 +1,6 @@
 import { getHotels } from "@/actions/getHotels";
 import HotelList from "@/components/hotel/HotelList";
+import { connection } from 'next/server'
 
 interface HomeProps {
   searchParams?: Promise<{
@@ -23,6 +24,7 @@ export default async function Home({ searchParams }: HomeProps) {
   if (!hotels || hotels.length === 0) {
     return <div>No hotels found...</div>;
   }
+  await connection()
 
   return (
     <div>
