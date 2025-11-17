@@ -211,57 +211,6 @@ const RoomCard = ({ hotel, room, bookings = [] }: RoomCardProps) => {
     console.log("BOOKING DATA:", bookingRoomData);
 
 
-
-//   const bookingRoomData = {
-//   room,
-//   totalPrice,
-//   breakFastIncluded: includeBreakfast,
-//   startDate: internalRange.from,
-//   endDate: internalRange.to,
-// };
-// setRoomData(bookingRoomData);
-
-// fetch("/api/book-room", {
-//   method: "POST",
-//   headers: { "Content-Type": "application/json" },
-//   body: JSON.stringify({
-//     booking: {
-//       hotelOwnerID: hotel.userId,
-//       hotelId: hotel._id,
-//       roomId: room._id,
-//       startDate: internalRange.from,
-//       endDate: internalRange.to,
-//       totalPrice: totalPrice,
-//       breakFastIncluded: includeBreakfast,
-//     },
-//     userEmail: user?.emailAddresses[0]?.emailAddress,
-//     userName: user?.firstName,
-//   }),
-// })
-//   .then(async (res) => {
-//     if (res.status === 401) return router.push("/sign-in");
-//     if (!res.ok) {
-//       const errorText = await res.text();
-//       throw new Error(errorText || "Booking failed");
-//     }
-//     return res.json();
-//   })
-//   .then((data) => {
-//     if (data.authorization_url) {
-//       // ✅ Just redirect to Paystack - they'll handle the rest
-//       window.location.href = data.authorization_url;
-//     } else {
-//       throw new Error("No payment URL received");
-//     }
-//   })
-//   .catch((err) => {
-//     console.error("Booking error:", err);
-//     setBookingIsLoading(false);
-//   });
-
-// console.log("BOOKING DATA:", bookingRoomData);
-  };
-
   return (
     <Card>
       <CardHeader>

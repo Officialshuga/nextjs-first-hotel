@@ -50,7 +50,7 @@ export async function POST(req: Request) {
       currency: "NGN",
       totalPrice: booking.totalPrice,
       paymentIntentId: paystackData.data.reference,
-      paymentStatus: false,
+      paymentStatus: true,
       bookedAt: new Date(),
       Hotel: booking.hotelId,
       Room: booking.roomId,
