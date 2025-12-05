@@ -743,7 +743,7 @@ const AddHotelForm = ({ hotel, bookings }: AddHotelFormProps) => {
 
                 {hotel && (
                   <Dialog open={open} onOpenChange={setOpen}>
-                    <DialogTrigger>
+                    <DialogTrigger asChild>
                       <Button
                         type="button"
                         variant="outline"

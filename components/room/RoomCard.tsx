@@ -198,7 +198,7 @@ const RoomCard = ({ hotel, room, bookings = [] }: RoomCardProps) => {
       .then((data) => {
         if (data.authorization_url) {
           window.location.href = data.authorization_url;
-          router.push("/book-room")
+          router.push("/my-bookings")
         } else {
           throw new Error("No payment URL received");
         }

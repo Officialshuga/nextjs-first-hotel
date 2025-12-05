@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 import { HotelWithRooms } from "./AddHotelForm";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";

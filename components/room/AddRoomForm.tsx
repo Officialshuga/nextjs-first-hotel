@@ -1008,7 +1008,7 @@ const AddRoomForm = ({ hotel, room, handleDialogueOpen }: AddRoomFormProps) => {
                         src={image}
                         alt="room image"
                         width={400}
-                        height={400}
+                        height={200}
                         className="object-contain"
                       />
                       <Button
