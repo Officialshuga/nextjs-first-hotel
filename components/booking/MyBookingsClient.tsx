@@ -245,11 +245,11 @@ if (!booking.Hotel || !booking.Room) {
             {booking.breakFastIncluded && <div>Breakfast will be served</div>}
             {booking.paymentStatus ? (
               <div className="text-teal-500">
-                Paid ${booking.totalPrice} - Room Reserved
+                Paid ₦{booking.totalPrice} - Room Reserved
               </div>
             ) : (
               <div className="text-rose-500">
-                Not Paid ${booking.totalPrice} - Room Not Reserved
+                Not Paid ₦{booking.totalPrice} - Room Not Reserved
               </div>
             )}
           </div>
