@@ -817,6 +817,7 @@ const AddRoomForm = ({ hotel, room, handleDialogueOpen }: AddRoomFormProps) => {
                 </FormDescription>
                 <FormControl>
                   <Textarea
+                  maxLength={900}
                     placeholder="Have a beautiful view of the Ocean"
                     {...field}
                   />
